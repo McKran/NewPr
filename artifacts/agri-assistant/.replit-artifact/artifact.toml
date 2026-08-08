@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AI Agriculture Assistant"
+version = "1.0.0"
+id = "artifacts/agri-assistant"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22500
+
+[services.development]
+run = "pnpm --filter @workspace/agri-assistant run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/agri-assistant", "run", "build" ]
+publicDir = "artifacts/agri-assistant/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22500"
+BASE_PATH = "/"

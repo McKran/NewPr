@@ -1,0 +1,25 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "workspaces": [
+    "artifacts/agri-assistant",
+    "artifacts/api-server",
+    "lib/*",
+    "scripts"
+  ],
+  "scripts": {
+    "dev": "npm run build --workspace=artifacts/agri-assistant && npm run dev --workspace=artifacts/api-server",
+    "build": "npm run typecheck && npm run build --workspaces --if-present",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "npm run typecheck:libs && npm run typecheck --workspaces --if-present"
+  },
+  "private": true,
+  "devDependencies": {
+    "prettier": "^3.8.3",
+    "typescript": "~5.9.3"
+  },
+  "dependencies": {
+    "@google/genai": "^2.16.0"
+  }
+}

@@ -1,0 +1,667 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: AI Agriculture Assistant API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: weather
+    description: Weather data and forecasts
+  - name: crops
+    description: Crop recommendations
+  - name: market
+    description: Market prices
+  - name: dashboard
+    description: Dashboard summary data
+  - name: openai
+    description: AI Chat assistant
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /geo/cities:
+    get:
+      operationId: getGeoCities
+      tags: [weather]
+      summary: Get verified cities for a country and region
+      parameters:
+        - name: country_code
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: region
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of cities with coordinates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeoCity"
+
+  /weather/current:
+    get:
+      operationId: getWeather
+      tags: [weather]
+      summary: Get current weather
+      parameters:
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: lat
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: lon
+          in: query
+          required: false
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Current weather data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeatherData"
+
+  /weather/forecast:
+    get:
+      operationId: getWeatherForecast
+      tags: [weather]
+      summary: Get 7-day weather forecast
+      parameters:
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: lat
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: lon
+          in: query
+          required: false
+          schema:
+            type: number
+      responses:
+        "200":
+          description: 7-day forecast
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ForecastDay"
+
+  /weather/farming-advice:
+    get:
+      operationId: getFarmingAdvice
+      tags: [weather]
+      summary: Get AI farming advice based on current weather
+      parameters:
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: crop
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: AI-generated farming advice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FarmingAdvice"
+
+  /crops/recommendations:
+    get:
+      operationId: getCropRecommendations
+      tags: [crops]
+      summary: Get crop recommendations for location and season
+      parameters:
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: season
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Crop recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CropRecommendation"
+
+  /crops/calendar:
+    get:
+      operationId: getCropCalendar
+      tags: [crops]
+      summary: Get planting calendar for the month
+      parameters:
+        - name: month
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Planting calendar events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CalendarEvent"
+
+  /market/prices:
+    get:
+      operationId: getMarketPrices
+      tags: [market]
+      summary: Get current market prices for crops
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Market prices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MarketPrice"
+
+  /market/insights:
+    get:
+      operationId: getMarketInsight
+      tags: [market]
+      summary: Get AI-powered market insight for a specific crop
+      parameters:
+        - name: crop
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: country
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detailed market insight
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketInsight"
+
+  /market/trends:
+    get:
+      operationId: getMarketTrends
+      tags: [market]
+      summary: Get market trend summary
+      responses:
+        "200":
+          description: Market trends summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketTrends"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard overview data
+      parameters:
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /openai/conversations:
+    get:
+      operationId: listOpenaiConversations
+      tags: [openai]
+      summary: List all conversations
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiConversation"
+    post:
+      operationId: createOpenaiConversation
+      tags: [openai]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenaiConversationInput"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversation"
+
+  /openai/conversations/{id}:
+    get:
+      operationId: getOpenaiConversation
+      tags: [openai]
+      summary: Get conversation with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversationWithMessages"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+    delete:
+      operationId: deleteOpenaiConversation
+      tags: [openai]
+      summary: Delete a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+
+  /openai/conversations/{id}/messages:
+    post:
+      operationId: sendOpenaiMessage
+      tags: [openai]
+      summary: Send a message and receive streaming AI response
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenaiMessageInput"
+      responses:
+        "200":
+          description: SSE stream of assistant text chunks
+          content:
+            text/event-stream: {}
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    WeatherData:
+      type: object
+      required: [location, temperature, humidity, rainfall, condition, windSpeed, feelsLike, uvIndex, updatedAt]
+      properties:
+        location:
+          type: string
+        temperature:
+          type: number
+        humidity:
+          type: number
+        rainfall:
+          type: number
+        condition:
+          type: string
+        windSpeed:
+          type: number
+        feelsLike:
+          type: number
+        uvIndex:
+          type: number
+        updatedAt:
+          type: string
+
+    ForecastDay:
+      type: object
+      required: [date, dayName, high, low, condition, humidity, rainfall, farmingNote]
+      properties:
+        date:
+          type: string
+        dayName:
+          type: string
+        high:
+          type: number
+        low:
+          type: number
+        condition:
+          type: string
+        humidity:
+          type: number
+        rainfall:
+          type: number
+        farmingNote:
+          type: string
+
+    FarmingAdvice:
+      type: object
+      required: [location, advice, urgentAlerts, recommendations]
+      properties:
+        location:
+          type: string
+        advice:
+          type: string
+        urgentAlerts:
+          type: array
+          items:
+            type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+
+    CropRecommendation:
+      type: object
+      required: [cropName, suitability, riskLevel, estimatedYield, plantingWindow, notes, icon]
+      properties:
+        cropName:
+          type: string
+        suitability:
+          type: string
+        riskLevel:
+          type: string
+        estimatedYield:
+          type: string
+        plantingWindow:
+          type: string
+        notes:
+          type: string
+        icon:
+          type: string
+
+    CalendarEvent:
+      type: object
+      required: [crop, activity, daysFromNow, priority]
+      properties:
+        crop:
+          type: string
+        activity:
+          type: string
+        daysFromNow:
+          type: integer
+        priority:
+          type: string
+
+    GeoCity:
+      type: object
+      required: [name, lat, lon, country_code]
+      properties:
+        name:
+          type: string
+        lat:
+          type: number
+        lon:
+          type: number
+        country_code:
+          type: string
+        admin1:
+          type: string
+        population:
+          type: number
+
+    MarketPrice:
+      type: object
+      required: [crop, localPrice, internationalPrice, unit, trend, changePercent, category]
+      properties:
+        crop:
+          type: string
+        localPrice:
+          type: number
+        internationalPrice:
+          type: number
+        unit:
+          type: string
+        trend:
+          type: string
+        changePercent:
+          type: number
+        category:
+          type: string
+        aiInsight:
+          type: string
+
+    MarketInsight:
+      type: object
+      required: [crop, priceDirection, localAnalysis, globalAnalysis, keyDrivers, futureOutlook, confidence, generatedAt]
+      properties:
+        crop:
+          type: string
+        currentPrice:
+          type: number
+        priceDirection:
+          type: string
+        changePercent:
+          type: number
+        localAnalysis:
+          type: string
+        globalAnalysis:
+          type: string
+        keyDrivers:
+          type: array
+          items:
+            type: string
+        futureOutlook:
+          type: string
+        seasonalNote:
+          type: string
+        confidence:
+          type: string
+        generatedAt:
+          type: string
+
+    MarketTrends:
+      type: object
+      required: [topGainer, topLoser, mostStable, marketSentiment, lastUpdated]
+      properties:
+        topGainer:
+          type: string
+        topLoser:
+          type: string
+        mostStable:
+          type: string
+        marketSentiment:
+          type: string
+        lastUpdated:
+          type: string
+
+    DashboardSummary:
+      type: object
+      required: [weather, topCropRecommendation, marketAlert, farmingTip, alertCount]
+      properties:
+        weather:
+          $ref: "#/components/schemas/WeatherData"
+        topCropRecommendation:
+          type: string
+        marketAlert:
+          type: string
+        farmingTip:
+          type: string
+        alertCount:
+          type: integer
+
+    OpenaiConversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - createdAt
+
+    OpenaiMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+
+    OpenaiConversationInput:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
+
+    OpenaiMessageInput:
+      type: object
+      properties:
+        content:
+          type: string
+        context:
+          type: object
+          properties:
+            location:
+              type: ["string", "null"]
+            currentCrop:
+              type: ["string", "null"]
+      required:
+        - content
+
+    OpenaiConversationWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenaiMessage"
+      required:
+        - id
+        - title
+        - createdAt
+        - messages
+
+    OpenaiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
